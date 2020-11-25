@@ -1,0 +1,8 @@
+{
+	"name": "OrderBlobProcessor",
+	"properties": {
+		"description": "This pipeline would process incoming Internet Order Blob Filed",
+		"concurrency": 1,
+		"annotations": []
+	}
+}
