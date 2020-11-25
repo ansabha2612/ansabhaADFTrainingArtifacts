@@ -8,17 +8,20 @@
 		"BlobMetadataSQLConnection_connectionString": {
 			"value": ""
 		},
+		"OrdersBlobStorageConnection_connectionString": {
+			"value": ""
+		},
 		"OrganizedDLSConnection_accountKey": {
 			"value": ""
 		},
 		"DLSTargetProviderFunction_properties_typeProperties_functionAppUrl": {
 			"value": "https://dlstargetprovider20201125160234.azurewebsites.net"
 		},
-		"TrainingKVConnection_properties_typeProperties_baseUrl": {
-			"value": "https://ansabhakeyvaulttraining.vault.azure.net/"
-		},
 		"OrganizedDLSConnection_properties_typeProperties_url": {
 			"value": "https://ansabhatrainingadlstrgt.dfs.core.windows.net"
+		},
+		"TrainingKVConnection_properties_typeProperties_baseUrl": {
+			"value": "https://ansabhakeyvaulttraining.vault.azure.net/"
 		}
 	}
 }
