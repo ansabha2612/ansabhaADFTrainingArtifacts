@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "ansabhaADFTraining"
 		},
+		"BlobMetadataSQLConnection_connectionString": {
+			"value": ""
+		},
 		"TrainingKVConnection_properties_typeProperties_baseUrl": {
 			"value": "https://ansabhakeyvaulttraining.vault.azure.net/"
 		}
