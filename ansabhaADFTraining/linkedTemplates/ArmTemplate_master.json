@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'OrganizedDLSConnection'"
 		},
+		"OrdersDataWareHouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'OrdersDataWareHouse'"
+		},
 		"DLSTargetProviderFunction_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://dlstargetprovider20201125160234.azurewebsites.net"
@@ -63,6 +67,9 @@
 					},
 					"OrganizedDLSConnection_accountKey": {
 						"value": "[parameters('OrganizedDLSConnection_accountKey')]"
+					},
+					"OrdersDataWareHouse_connectionString": {
+						"value": "[parameters('OrdersDataWareHouse_connectionString')]"
 					},
 					"BlobMetadataSQLConnection_connectionString": {
 						"value": "[parameters('BlobMetadataSQLConnection_connectionString')]"

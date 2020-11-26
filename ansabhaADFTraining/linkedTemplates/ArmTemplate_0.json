@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'OrganizedDLSConnection'"
 		},
+		"OrdersDataWareHouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'OrdersDataWareHouse'"
+		},
 		"BlobMetadataSQLConnection_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'BlobMetadataSQLConnection'"
@@ -80,6 +84,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OrdersDataWareHouse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('OrdersDataWareHouse_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/OrdersBlobStorageDataSet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -90,13 +107,16 @@
 				},
 				"parameters": {
 					"containerName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "orders"
 					},
 					"folder": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "/"
 					},
 					"fileName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "orders-1.csv"
 					}
 				},
 				"annotations": [],
@@ -373,6 +393,95 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ProcessedordersDataWarehouseDataSet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OrdersDataWareHouse",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "OrderId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrderDate",
+						"type": "varchar"
+					},
+					{
+						"name": "CustomerFullName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CustomerType",
+						"type": "varchar"
+					},
+					{
+						"name": "CustomerLocation",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProductTitle",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Units",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "UnitPrice",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Amount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Discount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Region",
+						"type": "varchar"
+					},
+					{
+						"name": "BillingAddress",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ActiveStatus",
+						"type": "varchar"
+					},
+					{
+						"name": "UnitsInStock",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Credit",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "ProcessedOrders"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OrdersDataWareHouse')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/BlobMetadataDataSet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -450,6 +559,41 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "BlobMetadata"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/BlobMetadataSQLConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CapitalCitiesDataSet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "BlobMetadataSQLConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "CityId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CityName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Region",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "CapitalCities"
 				}
 			},
 			"dependsOn": [
@@ -767,6 +911,86 @@
 				"[concat(variables('factoryId'), '/datasets/OrdersBlobStorageDataSet')]",
 				"[concat(variables('factoryId'), '/datasets/OrganizedOrdersDLSDataset')]",
 				"[concat(variables('factoryId'), '/linkedServices/BlobMetadataSQLConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProcessOrdersDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "OrdersBlobStorageDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "OrdersDataSource"
+						},
+						{
+							"dataset": {
+								"referenceName": "CustomersDLSDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "CustomersDataSource"
+						},
+						{
+							"dataset": {
+								"referenceName": "ProductsDLSDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "ProductsDataSource"
+						},
+						{
+							"dataset": {
+								"referenceName": "CapitalCitiesDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "CapitalCitiesdataSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ProcessedordersDataWarehouseDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "OutputToDW"
+						}
+					],
+					"transformations": [
+						{
+							"name": "OrdersCustomersJoin"
+						},
+						{
+							"name": "OrdersCustomersProductsJoin"
+						},
+						{
+							"name": "OrderJoinedoutput"
+						},
+						{
+							"name": "SelectedCoulumns"
+						},
+						{
+							"name": "PrepareColumns"
+						},
+						{
+							"name": "CleansedRecords"
+						},
+						{
+							"name": "ProcessedRecords"
+						}
+					],
+					"script": "source(output(\n\t\torderid as integer,\n\t\torderdate as string,\n\t\tcustomer as integer,\n\t\tproduct as integer,\n\t\tunits as integer,\n\t\tbillingaddress as string,\n\t\tremarks as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> OrdersDataSource\nsource(output(\n\t\tcustomerid as integer,\n\t\tfullname as string,\n\t\taddress as string,\n\t\tcredit as integer,\n\t\tstatus as boolean\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CustomersDataSource\nsource(output(\n\t\titemdiscount as short,\n\t\tproductid as short,\n\t\ttitle as string,\n\t\tunitprice as short,\n\t\tunitsinstock as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'arrayOfDocuments') ~> ProductsDataSource\nsource(output(\n\t\tCityId as integer,\n\t\tCityName as string,\n\t\tRegion as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> CapitalCitiesdataSource\nOrdersDataSource, CustomersDataSource join(customer == customerid,\n\tjoinType:'inner',\n\tbroadcast: 'right')~> OrdersCustomersJoin\nOrdersCustomersJoin, ProductsDataSource join(product == productid,\n\tjoinType:'inner',\n\tbroadcast: 'right')~> OrdersCustomersProductsJoin\nOrdersCustomersProductsJoin, CapitalCitiesdataSource join(address == CityName,\n\tjoinType:'inner',\n\tbroadcast: 'right')~> OrderJoinedoutput\nOrderJoinedoutput select(mapColumn(\n\t\torderid,\n\t\torderdate,\n\t\tunits,\n\t\tbillingaddress,\n\t\tfullname,\n\t\tcustomerlocation = address,\n\t\tcredit,\n\t\tstatus,\n\t\titemdiscount,\n\t\ttitle,\n\t\tunitprice,\n\t\tunitsinstock,\n\t\tRegion\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectedCoulumns\nSelectedCoulumns derive(discount = toInteger(units * unitprice * itemdiscount * 0.01),\n\t\tamount = units * unitprice,\n\t\tactiveStatus = iif(status, \"Active\", \"Inactive\"),\n\t\tcustomerType = iif(credit < 1000, \"Silver\", iif(credit >= 10000 && credit < 1000, \"Gold\", \"Platinum\"))\r\n) ~> PrepareColumns\nPrepareColumns select(mapColumn(\n\t\torderid,\n\t\torderdate,\n\t\tunits,\n\t\tbillingaddress,\n\t\tfullname,\n\t\tcustomerlocation,\n\t\tcredit,\n\t\ttitle,\n\t\tunitprice,\n\t\tunitsinstock,\n\t\tRegion,\n\t\tdiscount,\n\t\tamount,\n\t\tactiveStatus,\n\t\tcustomerType,\n\t\tcredit\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CleansedRecords\nCleansedRecords filter(credit >= amount && unitsinstock >= units) ~> ProcessedRecords\nProcessedRecords sink(input(\n\t\tOrderId as integer,\n\t\tOrderDate as string,\n\t\tCustomerFullName as string,\n\t\tCustomerType as string,\n\t\tCustomerLocation as string,\n\t\tProductTitle as string,\n\t\tUnits as integer,\n\t\tUnitPrice as integer,\n\t\tAmount as integer,\n\t\tDiscount as integer,\n\t\tRegion as string,\n\t\tBillingAddress as string,\n\t\tActiveStatus as string,\n\t\tUnitsInStock as integer,\n\t\tCredit as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tstaged: true,\n\tmapColumn(\n\t\tOrderId = orderid,\n\t\tOrderDate = orderdate,\n\t\tCustomerFullName = fullname,\n\t\tCustomerType = customerType,\n\t\tCustomerLocation = customerlocation,\n\t\tProductTitle = title,\n\t\tUnits = units,\n\t\tUnitPrice = unitprice,\n\t\tAmount = amount,\n\t\tDiscount = discount,\n\t\tRegion,\n\t\tBillingAddress = billingaddress,\n\t\tActiveStatus = activeStatus,\n\t\tUnitsInStock = unitsinstock,\n\t\tCredit = credit\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> OutputToDW"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/OrdersBlobStorageDataSet')]",
+				"[concat(variables('factoryId'), '/datasets/CustomersDLSDataSet')]",
+				"[concat(variables('factoryId'), '/datasets/ProductsDLSDataSet')]",
+				"[concat(variables('factoryId'), '/datasets/CapitalCitiesDataSet')]",
+				"[concat(variables('factoryId'), '/datasets/ProcessedordersDataWarehouseDataSet')]"
 			]
 		}
 	]
