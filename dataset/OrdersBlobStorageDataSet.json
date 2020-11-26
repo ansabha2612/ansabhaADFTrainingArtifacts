@@ -8,11 +8,11 @@
 		"parameters": {
 			"containerName": {
 				"type": "string",
-				"defaultValue": "ansabhatrainingstoragev2"
+				"defaultValue": "orders"
 			},
 			"folder": {
 				"type": "string",
-				"defaultValue": "orders"
+				"defaultValue": "/"
 			},
 			"fileName": {
 				"type": "string",
