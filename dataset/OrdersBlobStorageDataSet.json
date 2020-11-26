@@ -7,13 +7,16 @@
 		},
 		"parameters": {
 			"containerName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "ansabhatrainingstoragev2"
 			},
 			"folder": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "orders"
 			},
 			"fileName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "orders-1.csv"
 			}
 		},
 		"annotations": [],
