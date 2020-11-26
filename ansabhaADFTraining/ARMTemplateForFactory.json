@@ -337,6 +337,65 @@
 										"referenceName": "BlobMetadataSQLConnection",
 										"type": "LinkedServiceReference"
 									}
+								},
+								{
+									"name": "ProcessOrdersDataFlow",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "Prepare DLS Target information",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "ProcessOrdersDataFlow",
+											"type": "DataFlowReference",
+											"parameters": {},
+											"datasetParameters": {
+												"OrdersDataSource": {
+													"containerName": {
+														"value": "@activity('Prepare DLS Target information').output.containerName",
+														"type": "Expression"
+													},
+													"folder": {
+														"value": "@activity('Prepare DLS Target information').output.path",
+														"type": "Expression"
+													},
+													"fileName": {
+														"value": "@activity('Prepare DLS Target information').output.blobName",
+														"type": "Expression"
+													}
+												},
+												"CustomersDataSource": {},
+												"ProductsDataSource": {},
+												"CapitalCitiesdataSource": {},
+												"OutputToDW": {}
+											}
+										},
+										"staging": {
+											"linkedService": {
+												"referenceName": "OrdersBlobStorageConnection",
+												"type": "LinkedServiceReference"
+											},
+											"folderPath": "staging-data//"
+										},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
 								}
 							]
 						}
@@ -350,7 +409,9 @@
 				"[concat(variables('factoryId'), '/linkedServices/DLSTargetProviderFunction')]",
 				"[concat(variables('factoryId'), '/datasets/OrdersBlobStorageDataSet')]",
 				"[concat(variables('factoryId'), '/datasets/OrganizedOrdersDLSDataset')]",
-				"[concat(variables('factoryId'), '/linkedServices/BlobMetadataSQLConnection')]"
+				"[concat(variables('factoryId'), '/linkedServices/BlobMetadataSQLConnection')]",
+				"[concat(variables('factoryId'), '/dataflows/ProcessOrdersDataFlow')]",
+				"[concat(variables('factoryId'), '/linkedServices/OrdersBlobStorageConnection')]"
 			]
 		},
 		{
